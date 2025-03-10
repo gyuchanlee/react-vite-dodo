@@ -1,0 +1,141 @@
+.messages-list {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.messages-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+    text-align: center;
+    padding: 20px;
+}
+
+.messages-empty p {
+    margin: 5px 0;
+}
+
+.message-date-group {
+    margin-bottom: 20px;
+}
+
+.message-date {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.message-date span {
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.message-group {
+    display: flex;
+    margin-bottom: 16px;
+    max-width: 80%;
+}
+
+.my-group {
+    flex-direction: row-reverse;
+    align-self: flex-end;
+}
+
+.other-group {
+    align-self: flex-start;
+}
+
+.system-group {
+    flex-direction: column;
+    align-self: center;
+    max-width: 90%;
+}
+
+.message-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: #4d7bf3;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.message-username {
+    font-size: 12px;
+    margin-top: 4px;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.message-content-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-bubble {
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 12px;
+    margin-bottom: 2px;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.my-group .message-bubble {
+    background-color: #dcf8c6;
+    border-top-right-radius: 0;
+    align-self: flex-end;
+}
+
+.other-group .message-bubble {
+    background-color: #f1f0f0;
+    border-top-left-radius: 0;
+}
+
+.system-group .message-bubble {
+    background-color: #e1f5fe;
+    color: #555;
+    font-style: italic;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 15px;
+    border-radius: 12px;
+}
+
+.message-content {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.system-group .message-time {
+    text-align: center;
+}
