@@ -4,7 +4,7 @@ import './MessageList.css';
 
 interface MessageListProps {
     messages: Message[];
-    currentUserId: string | undefined;
+    currentUserId: number | undefined;
 }
 
 const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) => {

@@ -4,7 +4,7 @@ import './UserList.css';
 
 interface UserListProps {
     users: ChatUser[];
-    currentUserId?: string;
+    currentUserId?: number;
 }
 
 const UserList: React.FC<UserListProps> = ({ users, currentUserId }) => {

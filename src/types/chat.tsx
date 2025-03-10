@@ -27,7 +27,7 @@ export interface ChatUser {
 }
 
 export interface TypingStatus {
-    userId: string;
+    userId: number;
     username: string;
     isTyping: boolean;
 }

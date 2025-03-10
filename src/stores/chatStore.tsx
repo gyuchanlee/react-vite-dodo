@@ -183,19 +183,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
 // 선택자 함수
 export const chatSelectors = {
     // 특정 채팅방의 메시지
-    roomMessages: (roomId: string | null) => (state: ChatState) =>
+    roomMessages: (roomId: number | undefined) => (state: ChatState) =>
         roomId ? state.messages[roomId] || [] : [],
 
     // 특정 채팅방의 사용자
-    roomUsers: (roomId: string | null) => (state: ChatState) =>
+    roomUsers: (roomId: number | undefined) => (state: ChatState) =>
         roomId ? state.roomUsers[roomId] || [] : [],
 
     // 특정 채팅방에서 타이핑 중인 사용자
-    typingUsers: (roomId: string | null) => (state: ChatState) =>
+    typingUsers: (roomId: number | undefined) => (state: ChatState) =>
         roomId ? state.typingUsers[roomId] || [] : [],
 
     // 특정 채팅방에서 온라인 사용자 수
-    onlineUserCount: (roomId: string | null) => (state: ChatState) => {
+    onlineUserCount: (roomId: number | undefined) => (state: ChatState) => {
         if (!roomId) return 0;
         return (state.roomUsers[roomId] || []).filter(user => user.isOnline).length;
     }

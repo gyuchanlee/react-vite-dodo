@@ -1,17 +1,20 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
-import { useRoomsStore, roomsSelectors } from '../stores/chatRoomStore';
-import { useChatStore, chatSelectors } from '../stores/chatStore';
-import { useSocket } from '../hooks/useSocket';
+import React, {useEffect, useRef, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
+import {useAuthStore} from '../stores/authStore';
+import {useRoomsStore} from '../stores/chatRoomStore';
+import {chatSelectors, useChatStore} from '../stores/chatStore';
+import {useSocket} from '../hooks/useSocket';
 import MessageList from '../components/chat/MessageList';
 import UserList from '../components/chat/UserList';
 import MessageInput from '../components/chat/MessageInput';
-import { Message, ChatUser, TypingStatus } from '../types/chat';
+import {ChatUser, Message, TypingStatus} from '../types/chat';
 import './ChatRoom.css';
+// @ts-ignore
+import { Timeout } from 'node:timers';
 
 const ChatRoom: React.FC = () => {
     const { roomId } = useParams<{ roomId: string }>();
+    const parsedRoomId = roomId ? Number(roomId) : undefined;
     const navigate = useNavigate();
 
     // 인증 상태
@@ -19,7 +22,7 @@ const ChatRoom: React.FC = () => {
 
     // 채팅방 상태
     const currentRoom = useRoomsStore(state =>
-        roomId ? state.rooms.find(r => r.id === roomId) : null
+        roomId ? state.rooms.find(r => r.id === parsedRoomId) : null
     );
     const setCurrentRoom = useRoomsStore(state => state.setCurrentRoom);
     const leaveRoom = useRoomsStore(state => state.leaveRoom);
@@ -30,12 +33,12 @@ const ChatRoom: React.FC = () => {
     const addMessage = useChatStore(state => state.addMessage);
     const updateTypingStatus = useChatStore(state => state.updateTypingStatus);
     const updateUserStatus = useChatStore(state => state.updateUserStatus);
-    const messages = useChatStore(roomId ? chatSelectors.roomMessages(roomId) : () => []);
-    const roomUsers = useChatStore(roomId ? chatSelectors.roomUsers(roomId) : () => []);
+    const messages = useChatStore(roomId ? chatSelectors.roomMessages(parsedRoomId) : () => []);
+    const roomUsers = useChatStore(roomId ? chatSelectors.roomUsers(parsedRoomId) : () => []);
 
     // 로컬 상태
     const [messageInput, setMessageInput] = useState('');
-    const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const typingTimerRef = useRef<Timeout | null>(null);
 
     // 소켓 연결
     const { isConnected, emit, on } = useSocket(roomId || null, {

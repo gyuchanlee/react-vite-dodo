@@ -8,7 +8,7 @@ interface UseSocketOptions {
     onError?: (error: any) => void;
 }
 
-export function useSocket(roomId: string | null, options: UseSocketOptions = {}) {
+export function useSocket(roomId: number | null, options: UseSocketOptions = {}) {
     const socketRef = useRef<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const { user } = useAuthStore();
