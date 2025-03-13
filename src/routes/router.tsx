@@ -2,6 +2,9 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 // import { redirect } from "react-router-dom";
 import ChatPage from "../pages/chat/ChatPage.tsx";
 import HomePage from "../pages/HomePage.tsx";
+import Login from "../pages/auth/Login.tsx";
+import Profile from "../pages/user/Profile.tsx";
+import Register from "../pages/auth/Register.tsx";
 
 // 에러페이지
 const NotFoundPage = () => {
@@ -32,7 +35,7 @@ const NotFoundPage = () => {
     );
 };
 
-const PLZ_SKIP = false; // 개발하는 동안 false
+const PLZ_SKIP = true; // 개발하는 동안 false
 
 // 로컬 스토리지에서 인증 확인 함수 todo JWT 적용 후.
 const checkAuth = () => {
@@ -88,10 +91,6 @@ const router = createBrowserRouter([
         element: <ProtectedLayout />,
         children: [
             {
-                path: "/",
-                element: <HomePage />,
-            },
-            {
                 // todo 나중에 채팅방 리스트 찾기 해야댐
                 path: "/chats",
                 element: <ChatPage />,
@@ -103,7 +102,25 @@ const router = createBrowserRouter([
                 element: <ChatPage />,
                 // loader: authLoader,
             },
+            {
+                path: "/mypage",
+                element: <Profile />,
+                // loader: authLoader,
+            },
         ],
+    },
+    // 모든 사용자에게 열려있음
+    {
+        path: "/",
+        element: <HomePage />,
+    },
+    {
+        path: "/login",
+        element: <Login />
+    },
+    {
+        path: "/register",
+        element: <Register />
     },
     // {
     //     // 인증되지 않은 사용자를 위한 경로

@@ -78,7 +78,8 @@ const HomePage: React.FC = () => {
     const navigate = useNavigate();
 
     const handleLogin = () => {
-        // Simulate login
+        navigate("/login");
+        // todo 로그인 로그아웃 여부때마다 플래그 바꾸기
         setIsLoggedIn(true);
     };
 
