@@ -5,6 +5,7 @@ import {theme as chakraTheme} from '@chakra-ui/theme';
 import {extendTheme} from '@chakra-ui/theme-utils';
 import {RouterProvider} from "react-router-dom";
 import router from "./routes/router.tsx";
+import 'leaflet/dist/leaflet.css';
 
 // 슬랙과 유사한 색상으로 커스텀 테마 생성
 const theme = extendTheme({

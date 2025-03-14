@@ -1,10 +1,12 @@
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import {createBrowserRouter, Navigate, Outlet} from "react-router-dom";
 // import { redirect } from "react-router-dom";
 import ChatPage from "../pages/chat/ChatPage.tsx";
 import HomePage from "../pages/HomePage.tsx";
 import Login from "../pages/auth/Login.tsx";
 import Profile from "../pages/user/Profile.tsx";
 import Register from "../pages/auth/Register.tsx";
+import useAuthStore from "../stores/authStore.tsx";
+import ChatListPage from "../pages/chat/ChatListPage.tsx";
 
 // 에러페이지
 const NotFoundPage = () => {
@@ -35,19 +37,15 @@ const NotFoundPage = () => {
     );
 };
 
-const PLZ_SKIP = true; // 개발하는 동안 false
+const PLZ_SKIP = true; // 권한없이 개발하는 동안 false
 
-// 로컬 스토리지에서 인증 확인 함수 todo JWT 적용 후.
-const checkAuth = () => {
-    const user = localStorage.getItem('token');
-    return !!user;
-};
-
-// 보호된 라우트를 위한 레이아웃 컴포넌트 todo 인증 로직 완성시키기
+// 보호된 라우트를 위한 레이아웃 컴포넌트
 const ProtectedLayout = () => {
+
+    const { isAuthenticated } = useAuthStore();
+
     // 인증 상태 확인
     if (PLZ_SKIP) {
-        const isAuthenticated: boolean = checkAuth();
 
         // 인증되지 않은 경우 로그인 페이지로 리디렉션
         if (!isAuthenticated) {
@@ -59,31 +57,6 @@ const ProtectedLayout = () => {
     return <Outlet />;
 };
 
-// 이미 인증된 사용자를 위한
-// const AuthRedirect = () => {
-//     const isAuthenticated = checkAuth();
-//
-//     // 이미 인증된 경우 채팅 목록으로 리디렉션
-//     if (isAuthenticated) {
-//         return <Navigate to="/chats" replace />;
-//     }
-//
-//     // 인증되지 않은 경우 자식 라우트 렌더링
-//     return <Outlet />;
-// };
-
-// 라우터 로더 함수 - 인증 필요한 라우트에 사용
-// const authLoader = () => {
-//     const isAuthenticated = checkAuth();
-//
-//     if (!isAuthenticated) {
-//         // 현재 경로를 state로 전달하여 로그인 후 리디렉션 가능하게 함
-//         return redirect(`/login?redirect=${window.location.pathname}`);
-//     }
-//
-//     return null; // 인증 성공 시 계속 진행
-// };
-
 // 메인 라우터 설정 todo 나중에 인증까지 넣어서 완료
 const router = createBrowserRouter([
     {
@@ -91,19 +64,18 @@ const router = createBrowserRouter([
         element: <ProtectedLayout />,
         children: [
             {
-                // todo 나중에 채팅방 리스트 찾기 해야댐
                 path: "/chats",
-                element: <ChatPage />,
+                element: <ChatListPage />,
                 // loader 함수를 사용한 인증 검사 (선택적)
                 // loader: authLoader,
             },
             {
-                path: "/chats/:chatId",
+                path: "/chats/:id",
                 element: <ChatPage />,
                 // loader: authLoader,
             },
             {
-                path: "/mypage",
+                path: "/profile",
                 element: <Profile />,
                 // loader: authLoader,
             },
@@ -122,16 +94,6 @@ const router = createBrowserRouter([
         path: "/register",
         element: <Register />
     },
-    // {
-    //     // 인증되지 않은 사용자를 위한 경로
-    //     element: <AuthRedirect />,
-    //     children: [
-    //         {
-    //             path: "login",
-    //             element: <LoginPage />,
-    //         },
-    //     ],
-    // },
     {
         // 매치되지 않는 모든 경로
         path: "*",

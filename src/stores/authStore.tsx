@@ -17,12 +17,12 @@ interface LoginCredentials {
 }
 
 // 회원가입 요청 데이터 타입
-// interface RegisterData {
-//     email: string;
-//     username: string;
-//     password: string;
-//     profile?: string;
-// }
+interface RegisterData {
+    email: string;
+    username: string;
+    password: string;
+    profile?: string;
+}
 
 // 인증 상태 저장소 타입
 interface AuthState {
@@ -34,7 +34,7 @@ interface AuthState {
     // 액션
     login: (credentials: LoginCredentials) => Promise<boolean>;
     logout: () => void;
-    register: (data: FormData) => Promise<boolean>;
+    register: (data: RegisterData) => Promise<boolean>;
     clearError: () => void;
 }
 
@@ -64,7 +64,7 @@ const useAuthStore = create<AuthState>()(
 
                     // 로그인 성공 시 사용자 정보 설정
                     set({
-                        user: response.data.user,
+                        user: response.data,
                         isAuthenticated: true,
                         isLoading: false,
                     });
@@ -107,7 +107,7 @@ const useAuthStore = create<AuthState>()(
             },
 
             // 회원가입 함수
-            register: async (data: FormData) => {
+            register: async (data: RegisterData) => {
                 set({ isLoading: true, error: null });
 
                 try {

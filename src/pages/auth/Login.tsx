@@ -14,9 +14,9 @@ import {
     Flex,
     Image,
     Divider,
-    useColorModeValue,
+    useColorModeValue, useToast,
 } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
 
 const Login: React.FC = () => {
@@ -26,6 +26,9 @@ const Login: React.FC = () => {
 
     // 인증 스토어에서 필요한 상태와 함수 가져오기
     const { login, isLoading, error, clearError } = useAuthStore();
+
+    const navigate = useNavigate();
+    const toast = useToast();
 
     // 폼 제출 핸들러
     const handleSubmit = async (e: React.FormEvent) => {
@@ -41,8 +44,17 @@ const Login: React.FC = () => {
         const success = await login({ email, password });
 
         if (success) {
-            // 로그인 성공 시 처리 (예: 리다이렉션)
-            console.log('로그인 성공!');
+            // replace: true 옵션으로 현재 페이지를 대체하여 뒤로가기 방지
+            navigate('/', { replace: true });
+
+            // 토스트 메시지 표시 (선택 사항)
+            toast({
+                title: '로그인 성공',
+                description: '환영합니다!',
+                status: 'success',
+                duration: 500,
+                isClosable: true,
+            });
         }
     };
 
@@ -66,6 +78,10 @@ const Login: React.FC = () => {
                         alt="로고"
                         boxSize="80px"
                         mb={4}
+                        onClick={() => navigate("/")}
+                        cursor="pointer"
+                        _hover={{ transform: "scale(1.05)" }}
+                        transition="transform 0.2s"
                     />
                     <Heading size="lg" color="slack.purple" textAlign="center">
                         동네 사랑방

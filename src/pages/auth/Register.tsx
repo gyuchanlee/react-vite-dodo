@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -20,37 +20,33 @@ import {
     useToast,
     FormHelperText,
     HStack,
-    Icon,
-    Center,
-    Avatar,
-    AvatarBadge
+    Icon
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiEye, FiEyeOff, FiCheckCircle, FiAlertCircle, FiUpload, FiX } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import useAuthStore from '../../stores/authStore';
 
-interface RegisterFormData {
+// Updated interface per request
+interface RegisterData {
     email: string;
     username: string;
     password: string;
-    passwordConfirm: string;
-    profileImage?: File | null;
+    profile?: string;
 }
 
 const Register: React.FC = () => {
-    const [formData, setFormData] = useState<RegisterFormData>({
+    const [formData, setFormData] = useState<RegisterData>({
         email: '',
         username: '',
         password: '',
-        passwordConfirm: '',
-        profileImage: null
+        // Default profile is now optional
     });
+
+    // For password confirmation (not part of the sent data)
+    const [passwordConfirm, setPasswordConfirm] = useState('');
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { register, isLoading, error, clearError } = useAuthStore();
     const navigate = useNavigate();
@@ -61,69 +57,14 @@ const Register: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-
-            // 파일 크기 제한 (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                toast({
-                    title: '파일 크기 초과',
-                    description: '프로필 이미지는 5MB 이하만 가능합니다.',
-                    status: 'error',
-                    duration: 3000,
-                    isClosable: true,
-                });
-                return;
-            }
-
-            // 이미지 파일 타입 검사
-            if (!file.type.match('image.*')) {
-                toast({
-                    title: '파일 형식 오류',
-                    description: '이미지 파일만 업로드 가능합니다.',
-                    status: 'error',
-                    duration: 3000,
-                    isClosable: true,
-                });
-                return;
-            }
-
-            // 미리보기 이미지 설정
-            const reader = new FileReader();
-            reader.onload = () => {
-                setPreviewImage(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-
-            // 폼 데이터에 이미지 파일 저장
+        if (name === 'passwordConfirm') {
+            setPasswordConfirm(value);
+        } else {
             setFormData(prev => ({
                 ...prev,
-                profileImage: file
+                [name]: value
             }));
-        }
-    };
-
-    const removeImage = () => {
-        setPreviewImage(null);
-        setFormData(prev => ({
-            ...prev,
-            profileImage: null
-        }));
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    };
-
-    const triggerFileInput = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
         }
     };
 
@@ -134,7 +75,7 @@ const Register: React.FC = () => {
 
     // 비밀번호 확인 일치 여부
     const passwordsMatch = () => {
-        return formData.password === formData.passwordConfirm;
+        return formData.password === passwordConfirm;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -175,19 +116,8 @@ const Register: React.FC = () => {
             return;
         }
 
-        // FormData 객체 생성 (이미지 업로드를 위해)
-        const formDataToSend = new FormData();
-        formDataToSend.append('email', formData.email);
-        formDataToSend.append('username', formData.username);
-        formDataToSend.append('password', formData.password);
-
-        // 프로필 이미지가 있다면 추가
-        if (formData.profileImage) {
-            // formDataToSend.append('profileImage', formData.profileImage);
-        }
-
-        // 회원가입 요청 (useAuthStore의 register 함수를 FormData를 처리할 수 있도록 수정해야 함)
-        const success = await register(formDataToSend);
+        // 회원가입 요청
+        const success = await register(formData);
 
         if (success) {
             toast({
@@ -217,10 +147,14 @@ const Register: React.FC = () => {
                 <Flex direction="column" align="center" mb={6}>
                     {/* 앱 로고 또는 아이콘 */}
                     <Image
-                        src="https://via.placeholder.com/100"
+                        src="https://img.freepik.com/premium-vector/live-chat-icon-with-speech-bubble-customer-support-online-consultations_855620-580.jpg?w=740"
                         alt="로고"
                         boxSize="80px"
                         mb={4}
+                        onClick={() => navigate("/")}
+                        cursor="pointer"
+                        _hover={{ transform: "scale(1.05)" }}
+                        transition="transform 0.2s"
                     />
                     <Heading size="lg" color="slack.purple" textAlign="center">
                         새로운 계정 만들기
@@ -239,75 +173,11 @@ const Register: React.FC = () => {
 
                 <form onSubmit={handleSubmit}>
                     <Stack spacing={4}>
-                        <FormControl id="profileImage">
+                        {/* 프로필 이미지 기능은 주석 처리되었습니다 */}
+                        {/* <FormControl id="profileImage">
                             <FormLabel>프로필 이미지</FormLabel>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageUpload}
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                disabled={isLoading}
-                            />
-
-                            <Center>
-                                {previewImage ? (
-                                    <Box position="relative">
-                                        <Avatar
-                                            size="2xl"
-                                            src={previewImage}
-                                            name={formData.username || '사용자'}
-                                            mb={2}
-                                        >
-                                            <AvatarBadge
-                                                boxSize="1.5em"
-                                                bg="red.500"
-                                                borderColor="white"
-                                                cursor="pointer"
-                                                onClick={removeImage}
-                                            >
-                                                <Icon as={FiX} color="white" />
-                                            </AvatarBadge>
-                                        </Avatar>
-                                    </Box>
-                                ) : (
-                                    <Box
-                                        onClick={triggerFileInput}
-                                        cursor="pointer"
-                                        borderWidth={2}
-                                        borderStyle="dashed"
-                                        borderColor="gray.300"
-                                        borderRadius="full"
-                                        p={10}
-                                        _hover={{ borderColor: 'slack.purple' }}
-                                        transition="border-color 0.2s"
-                                    >
-                                        <Flex direction="column" align="center">
-                                            <Icon as={FiUpload} fontSize="3xl" color="gray.400" mb={2} />
-                                            <Text color="gray.500" fontSize="sm">프로필 이미지 추가</Text>
-                                        </Flex>
-                                    </Box>
-                                )}
-                            </Center>
-
-                            {!previewImage && (
-                                <Button
-                                    mt={2}
-                                    size="sm"
-                                    leftIcon={<FiUpload />}
-                                    onClick={triggerFileInput}
-                                    variant="outline"
-                                    colorScheme="purple"
-                                    w="full"
-                                    disabled={isLoading}
-                                >
-                                    이미지 업로드
-                                </Button>
-                            )}
-                            <FormHelperText textAlign="center">
-                                JPG, PNG 파일 (최대 5MB)
-                            </FormHelperText>
-                        </FormControl>
+                            ...
+                        </FormControl> */}
 
                         <FormControl id="email" isRequired>
                             <FormLabel>이메일</FormLabel>
@@ -388,13 +258,13 @@ const Register: React.FC = () => {
                             </FormHelperText>
                         </FormControl>
 
-                        <FormControl id="passwordConfirm" isRequired isInvalid={formData.passwordConfirm.length > 0 && !passwordsMatch()}>
+                        <FormControl id="passwordConfirm" isRequired isInvalid={passwordConfirm.length > 0 && !passwordsMatch()}>
                             <FormLabel>비밀번호 확인</FormLabel>
                             <InputGroup size="lg">
                                 <Input
                                     type={showConfirmPassword ? "text" : "password"}
                                     name="passwordConfirm"
-                                    value={formData.passwordConfirm}
+                                    value={passwordConfirm}
                                     onChange={handleChange}
                                     placeholder="비밀번호 재입력"
                                     borderColor="gray.300"
@@ -417,7 +287,7 @@ const Register: React.FC = () => {
                                 </InputRightElement>
                             </InputGroup>
                             <FormHelperText display="flex" alignItems="center">
-                                {formData.passwordConfirm && (
+                                {passwordConfirm && (
                                     <>
                                         {passwordsMatch() ? (
                                             <HStack>

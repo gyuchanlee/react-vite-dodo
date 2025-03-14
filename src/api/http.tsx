@@ -1,36 +1,22 @@
-// // src/api/http.ts
-// import axios from 'axios';
-//
-// const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-//
-// const http = axios.create({
-//     baseURL: BASE_URL,
-//     headers: {
-//         'Content-Type': 'application/json',
-//     },
-//     timeout: 10000, // 요청 타임아웃 10초
-// });
-//
-// // 요청 인터셉터: 토큰 추가
-// http.interceptors.request.use(config => {
-//     const token = localStorage.getItem('token');
-//     if (token) {
-//         config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-// });
-//
-// // 응답 인터셉터: 토큰 만료 처리
-// http.interceptors.response.use(
-//     response => response,
-//     error => {
-//         // 401 에러 처리
-//         if (error.response?.status === 401) {
-//             localStorage.removeItem('token');
-//             window.location.href = '/login';
-//         }
-//         return Promise.reject(error);
-//     }
-// );
-//
-// export default http;
+// src/api/apiClient.ts
+import axios from 'axios';
+
+// 기본 설정된 axios 인스턴스 생성
+const http = axios.create({
+    baseURL: 'http://localhost:8080', // 여기에 API 기본 URL todo 배포 시, 변경 필요
+    withCredentials: true, // 이 설정이 쿠키를 자동으로 요청에 포함시킴
+    headers: {
+        'Content-Type': 'application/json',
+    }
+});
+
+// 필요하다면 인터셉터로 요청/응답을 처리할 수 있음
+http.interceptors.response.use(
+    response => response,
+    error => {
+        // 401 에러 처리 등 가능
+        return Promise.reject(error);
+    }
+);
+
+export default http;

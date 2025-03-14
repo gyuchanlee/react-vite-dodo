@@ -1,24 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-    ChakraProvider,
     Box,
-    VStack,
-    Heading,
     Button,
-    Flex,
-    Icon,
+    ChakraProvider,
+    Container,
     extendTheme,
+    Flex,
+    Heading,
+    Icon,
     ThemeConfig,
     useColorModeValue,
-    Container
+    VStack
 } from '@chakra-ui/react';
-import {
-    MessageCircle,
-    Home,
-    User,
-    LogIn
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import {Home, LogIn, MessageCircle, User} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
+import useAuthStore from "../stores/authStore.tsx";
 
 // Define custom color theme type
 interface SlackColors {
@@ -71,7 +67,7 @@ const theme = extendTheme({
 
 const HomePage: React.FC = () => {
     // Simulating authentication state
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const { isAuthenticated, logout } = useAuthStore();
 
     const navBgColor = useColorModeValue('slack.lightGray', 'slack.gray');
     const navTextColor = useColorModeValue('slack.gray', 'white');
@@ -79,13 +75,11 @@ const HomePage: React.FC = () => {
 
     const handleLogin = () => {
         navigate("/login");
-        // todo 로그인 로그아웃 여부때마다 플래그 바꾸기
-        setIsLoggedIn(true);
     };
 
     const handleLogout = () => {
-        // Simulate logout
-        setIsLoggedIn(false);
+        // 로그아웃 수행
+        logout();
     };
 
     return (
@@ -132,7 +126,7 @@ const HomePage: React.FC = () => {
                             채팅방 입장
                         </Button>
 
-                        {!isLoggedIn ? (
+                        {!isAuthenticated ? (
                             <Button
                                 colorScheme="slack"
                                 variant="outline"
@@ -157,15 +151,16 @@ const HomePage: React.FC = () => {
                                 로그아웃
                             </Button>
                         )}
-
-                        <Button
+                        {!isAuthenticated ? <Button
                             colorScheme="slack"
                             variant="ghost"
                             size="lg"
                             leftIcon={<User />}
+                            onClick={(() => navigate("/register"))}
                         >
                             회원가입
-                        </Button>
+                        </Button> : <></>
+                        }
                     </VStack>
 
                     {/* Bottom Navigation */}
@@ -185,7 +180,7 @@ const HomePage: React.FC = () => {
                             <Icon as={MessageCircle} w={6} h={6} />
                         </Box>
                         <Box as="button" p={2}>
-                            {isLoggedIn ? (
+                            {isAuthenticated ? (
                                 <Icon as={User} w={6} h={6} />
                             ) : (
                                 <Icon as={LogIn} w={6} h={6} />

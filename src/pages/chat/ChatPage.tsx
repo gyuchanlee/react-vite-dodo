@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, {useEffect, useRef, useState} from "react";
 import {Stomp} from "@stomp/stompjs";
 import {
@@ -17,8 +16,10 @@ import {
     useToast,
     VStack
 } from "@chakra-ui/react";
-import {ArrowForwardIcon, ChatIcon, ArrowBackIcon} from "@chakra-ui/icons";
-import {useNavigate} from "react-router-dom";
+import {ArrowBackIcon, ArrowForwardIcon, ChatIcon} from "@chakra-ui/icons";
+import { useNavigate, useParams } from "react-router-dom";
+import http from "../../api/http.tsx";
+import useAuthStore from "../../stores/authStore.tsx";
 
 // 메시지 타입 정의
 interface Message {
@@ -41,6 +42,12 @@ export default function ChatPage() {
     // 토스트 알림
     const toast = useToast();
     const navigate = useNavigate();
+    // zustand
+    const email = useAuthStore((state) => state.user?.email);
+    const username = useAuthStore((state) => state.user?.username);
+    // 주소 url 에서 가져오기
+    const { id } = useParams();
+    const chatRoomId = id ? parseInt(id, 10) : undefined;
 
     // 입력 필드 변화에마다 밸류 업뎃
     const handleInputChange = (e: { target: { value: React.SetStateAction<string>; }; }) => {
@@ -59,8 +66,8 @@ export default function ChatPage() {
         // connected 상태인지 확인 추가
         if (stompClient.current && stompClient.current.connected && inputValue) {
             const body = {
-                messageId: 1,
-                username: "테스트1",
+                email: email,
+                chatRoomId: chatRoomId,
                 content: inputValue
             };
             stompClient.current.send(`/pub/message`, {}, JSON.stringify(body));
@@ -106,16 +113,16 @@ export default function ChatPage() {
         const socket = new WebSocket("ws://localhost:8080/ws");
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
-           // 메시지 수신 (roomId 임시 1) todo roomId 정보 받아서 알맞는 채팅방 보여주기
-           stompClient.current.subscribe(`/sub/chatroom/1`, (message: { body: string; }) => {
+           // 메시지 수신
+           stompClient.current.subscribe(`/sub/chatroom/${chatRoomId}`, (message: { body: string; }) => {
                // 누군가 발송했던 메시지를 리스트에 추가 (메시지 리스트 최신화)
                const newMessage = JSON.parse(message.body);
                console.log('#########################')
                console.log(newMessage)
                setMessages((preMessages) => [...preMessages, newMessage]);
 
-               // 다른 사용자의 메세지일 경우 알림 todo 임의 아이디 설정
-               if (newMessage.username !== "테스트1") {
+               // 다른 사용자의 메세지일 경우 알림
+               if (newMessage.username !== username) {
                    toast({
                        title: `${newMessage.username}님의 메시지`,
                        description: newMessage.content,
@@ -140,7 +147,7 @@ export default function ChatPage() {
     // 임시로 더미 데이터 사용 todo 백엔드 메시지 가져오기
     const fetchMessages = async () => {
         try {
-            const res = await axios.get("http://localhost:8080/api/chat/1");
+            const res = await http.get(`/api/chat/${chatRoomId}`);
             setMessages(res.data);
         } catch (error) {
             console.log(error);
@@ -177,7 +184,7 @@ export default function ChatPage() {
                             variant="ghost"
                             color="white"
                             mr={2}
-                            onClick={() => navigate("/")}
+                            onClick={() => navigate("/chats")}
                             _hover={{ bg: "rgba(255,255,255,0.2)" }}
                         >
                             <ArrowBackIcon boxSize={6} />
@@ -212,8 +219,7 @@ export default function ChatPage() {
                 >
                     <VStack spacing={4} align="stretch">
                         {messages.map((item, index) => (
-                            // todo isMine 부분은 접속한 유저의 이름 넣기
-                            <MessageItem key={index} message={item} isMine={item.username === "테스트1"} />
+                            <MessageItem key={index} message={item} isMine={item.username === username} />
                         ))}
                         <div ref={messagesEndRef} />
                     </VStack>
