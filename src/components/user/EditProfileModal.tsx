@@ -125,14 +125,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, us
             const success = await updateUser(updateData);
 
             if (success) {
-                toast({
-                    title: '프로필 업데이트 성공',
-                    description: '프로필 정보가 성공적으로 업데이트되었습니다.',
-                    status: 'success',
-                    duration: 1000,
-                    isClosable: true,
-                });
-
                 onSuccess();
                 onClose();
             } else if (error) {
