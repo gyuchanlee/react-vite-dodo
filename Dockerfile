@@ -8,7 +8,8 @@ RUN npm i
 
 COPY . .
 ENV NODE_ENV=production
-RUN npm run build
+# --mode production 플래그 추가
+RUN npm run build -- --mode production
 
 # 실행 단계
 FROM nginx:alpine
