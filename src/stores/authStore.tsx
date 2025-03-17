@@ -1,6 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import {create} from 'zustand';
+import {persist} from 'zustand/middleware';
 import axios from 'axios';
+import {setupAuthInterceptors} from "../api/setupAuthInterceptors.tsx";
 
 // 사용자 타입 정의
 interface User {
@@ -48,10 +49,10 @@ interface AuthState {
 }
 
 // API 클라이언트 설정
-const api = axios.create({
+const api = setupAuthInterceptors(axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000', // todo 배포 시 url 변경
     withCredentials: true,
-});
+}));
 
 // Zustand 스토어 생성 및 persist 적용
 const useAuthStore = create<AuthState>()(

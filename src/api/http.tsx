@@ -1,5 +1,6 @@
 // src/api/apiClient.ts
 import axios from 'axios';
+import { setupAuthInterceptors } from "./setupAuthInterceptors.tsx";
 
 // 기본 설정된 axios 인스턴스 생성
 const http = axios.create({
@@ -18,5 +19,8 @@ http.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+// 인증 인터셉터
+setupAuthInterceptors(http);
 
 export default http;
