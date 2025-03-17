@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 import axios from 'axios';
-import {api, setupAuthInterceptors} from "../api/setupAuthInterceptors";
+import http, { setLogoutHandler } from "../api/http.tsx";
 
 // 사용자 타입 정의
 interface User {
@@ -53,8 +53,9 @@ interface AuthState {
 const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => {
-            // 인터셉터 설정
-            setupAuthInterceptors(() => {
+
+            // 로그아웃 핸들러 등록
+            setLogoutHandler(() => {
                 const logout = get().logout;
                 logout();
             });
@@ -72,7 +73,7 @@ const useAuthStore = create<AuthState>()(
 
                     try {
                         // 백엔드 API 호출
-                        const response = await api.post('/api/auth/login', credentials);
+                        const response = await http.post('/api/auth/login', credentials);
 
                         // 로그인 성공 시 사용자 정보 설정
                         set({
@@ -112,7 +113,7 @@ const useAuthStore = create<AuthState>()(
                 logout: async () => {
                     try {
                         // 백엔드 로그아웃 API 호출
-                        await api.post('/api/auth/logout');
+                        await http.post('/api/auth/logout');
                     } catch (error) {
                         console.error('로그아웃 API 호출 중 오류:', error);
                     }
@@ -131,7 +132,7 @@ const useAuthStore = create<AuthState>()(
 
                     try {
                         // 백엔드 API 호출
-                        await api.post('/api/users/', data);
+                        await http.post('/api/users/', data);
 
                         // 회원가입 성공
                         set({ isLoading: false });
@@ -166,7 +167,7 @@ const useAuthStore = create<AuthState>()(
 
                     try {
                         // 백엔드 API 호출 - /api/users/{email} 형식으로 PUT 요청
-                        const response = await api.put(`/api/users/${data.email}`, data);
+                        const response = await http.put(`/api/users/${data.email}`, data);
 
                         // 업데이트된 사용자 정보
                         const updatedUser = response.data;

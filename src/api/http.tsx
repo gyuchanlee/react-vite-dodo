@@ -1,6 +1,11 @@
 // src/api/apiClient.ts
-import axios from 'axios';
-import { setupAuthInterceptors } from "./setupAuthInterceptors.tsx";
+import axios, {AxiosError} from 'axios';
+
+// 로그아웃 함수 타입
+type LogoutFunction = () => void;
+
+// 로그아웃 핸들러 변수
+let logoutHandler: LogoutFunction | null = null;
 
 // 기본 설정된 axios 인스턴스 생성
 const http = axios.create({
@@ -11,16 +16,28 @@ const http = axios.create({
     }
 });
 
-// 필요하다면 인터셉터로 요청/응답을 처리할 수 있음
+// 인증 인터셉터 추가
 http.interceptors.response.use(
-    response => response,
-    error => {
-        // 401 에러 처리 등 가능
+    (response) => response,
+    (error: AxiosError) => {
+        // 401 Unauthorized or 403 Forbidden error handling
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            // 등록된 로그아웃 핸들러가 있으면 실행
+            if (logoutHandler) {
+                logoutHandler();
+            }
+
+            // 로그아웃시, 리다이렉트
+            window.location.href = '/login';
+        }
+
         return Promise.reject(error);
     }
 );
 
-// 인증 인터셉터
-setupAuthInterceptors(http);
+// 로그아웃 핸들러 설정 함수
+export const setLogoutHandler = (handler: LogoutFunction) => {
+    logoutHandler = handler;
+};
 
 export default http;
