@@ -43,6 +43,16 @@ interface LeafletMapViewProps {
     formatDistance: (distance: number | undefined) => string | null;
 }
 
+// 사용자 정의 빨간색 마커 아이콘 생성
+// const redIcon = new L.Icon({
+//     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+//     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+//     iconSize: [25, 41],
+//     iconAnchor: [12, 41],
+//     popupAnchor: [1, -34],
+//     shadowSize: [41, 41]
+// });
+
 const LeafletMapView: React.FC<LeafletMapViewProps> = ({
                                                            userLocation,
                                                            filteredChatRooms,
@@ -116,9 +126,9 @@ const LeafletMapView: React.FC<LeafletMapViewProps> = ({
                 />
 
                 {/* 사용자 위치 마커 */}
-                <Marker position={[safeLocation.lat, safeLocation.lng]}>
-                    <Popup>내 위치</Popup>
-                </Marker>
+                {/*<Marker position={[safeLocation.lat, safeLocation.lng]} icon={redIcon}>*/}
+                {/*    <Popup>내 위치</Popup>*/}
+                {/*</Marker>*/}
 
                 {/* 반경 원 */}
                 <Circle

@@ -7,6 +7,8 @@ import Profile from "../pages/user/Profile.tsx";
 import Register from "../pages/auth/Register.tsx";
 import useAuthStore from "../stores/authStore.tsx";
 import ChatListPage from "../pages/chat/ChatListPage.tsx";
+import MainLayout from "../layouts/MainLayout.tsx";
+
 
 // 에러페이지
 const NotFoundPage = () => {
@@ -41,12 +43,10 @@ const PLZ_SKIP = true; // 권한없이 개발하는 동안 false
 
 // 보호된 라우트를 위한 레이아웃 컴포넌트
 const ProtectedLayout = () => {
-
     const { isAuthenticated } = useAuthStore();
 
     // 인증 상태 확인
     if (PLZ_SKIP) {
-
         // 인증되지 않은 경우 로그인 페이지로 리디렉션
         if (!isAuthenticated) {
             return <Navigate to="/login" replace />;
@@ -57,47 +57,48 @@ const ProtectedLayout = () => {
     return <Outlet />;
 };
 
-// 메인 라우터 설정 todo 나중에 인증까지 넣어서 완료
+// 메인 라우터 설정
 const router = createBrowserRouter([
     {
-        // 인증된 사용자를 위한 경로
-        element: <ProtectedLayout />,
+        // 루트 경로에 바텀 네비게이션 레이아웃 적용
+        element: <MainLayout />,
         children: [
+            // 인증이 필요한 경로들
             {
-                path: "/chats",
-                element: <ChatListPage />,
-                // loader 함수를 사용한 인증 검사 (선택적)
-                // loader: authLoader,
+                element: <ProtectedLayout />,
+                children: [
+                    {
+                        path: "/chats",
+                        element: <ChatListPage />,
+                    },
+                    {
+                        path: "/chats/:id",
+                        element: <ChatPage />,
+                    },
+                    {
+                        path: "/profile",
+                        element: <Profile />,
+                    },
+                ],
+            },
+            // 인증이 필요하지 않은 경로들
+            {
+                path: "/",
+                element: <HomePage />,
             },
             {
-                path: "/chats/:id",
-                element: <ChatPage />,
-                // loader: authLoader,
+                path: "/login",
+                element: <Login />
             },
             {
-                path: "/profile",
-                element: <Profile />,
-                // loader: authLoader,
+                path: "/register",
+                element: <Register />
             },
         ],
     },
-    // 모든 사용자에게 열려있음
+    // 에러 페이지 (바텀 네비게이션 없이)
     {
-        path: "/",
-        element: <HomePage />,
-    },
-    {
-        path: "/login",
-        element: <Login />
-    },
-    {
-        path: "/register",
-        element: <Register />
-    },
-    {
-        // 매치되지 않는 모든 경로
         path: "*",
-        // element: <Navigate to="/" replace />,
         element: <NotFoundPage />,
     },
 ]);

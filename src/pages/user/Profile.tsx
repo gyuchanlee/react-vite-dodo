@@ -1,34 +1,53 @@
+// src/pages/user/Profile.tsx
 import React from 'react';
 import {
+    Avatar,
+    Badge,
     Box,
     Button,
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
     Container,
     Divider,
     Flex,
     Heading,
-    Text,
-    Avatar,
-    VStack,
     HStack,
-    Badge,
+    IconButton,
+    Text,
     useColorModeValue,
-    Card,
-    CardHeader,
-    CardBody,
-    CardFooter,
-    IconButton
+    useDisclosure,
+    useToast,
+    VStack
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
-import { FiEdit, FiLogOut } from 'react-icons/fi';
+import {FiEdit, FiHome, FiLogOut} from 'react-icons/fi';
+import EditProfileModal from '../../components/user/EditProfileModal';
 
 const Profile: React.FC = () => {
     const { user, isAuthenticated, logout } = useAuthStore();
     const navigate = useNavigate();
+    const toast = useToast();
+
+    // 모달 상태 관리
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.700');
     const textColor = useColorModeValue('gray.700', 'gray.200');
+
+    // 모달이 성공적으로 닫혔을 때 실행할 함수
+    const handleEditSuccess = () => {
+        toast({
+            title: "프로필 업데이트",
+            description: "프로필 정보가 성공적으로 업데이트되었습니다.",
+            status: "success",
+            duration: 1000,
+            isClosable: true,
+        });
+    };
 
     // 인증되지 않은 사용자 처리
     if (!isAuthenticated || !user) {
@@ -66,7 +85,12 @@ const Profile: React.FC = () => {
     // 로그아웃 핸들러
     const handleLogout = () => {
         logout();
-        navigate('/login');
+        navigate('/');
+    };
+
+    // 홈으로 이동 핸들러
+    const handleGoHome = () => {
+        navigate('/');
     };
 
     // 사용자 가입일 포맷팅
@@ -77,7 +101,7 @@ const Profile: React.FC = () => {
     });
 
     return (
-        <Container maxW="lg" py={12}>
+        <Container maxW="lg" py={12} pb={16}> {/* 하단 패딩 추가 (바텀 내비게이션 공간) */}
             <Card
                 bg={bgColor}
                 boxShadow="md"
@@ -91,14 +115,24 @@ const Profile: React.FC = () => {
                         <Heading size="md" color="white">
                             사용자 프로필
                         </Heading>
-                        <IconButton
-                            aria-label="로그아웃"
-                            variant="ghost"
-                            color="white"
-                            icon={<FiLogOut />}
-                            onClick={handleLogout}
-                            _hover={{ bg: 'rgba(255, 255, 255, 0.2)' }}
-                        />
+                        <HStack spacing={2}>
+                            <IconButton
+                                aria-label="홈으로"
+                                variant="ghost"
+                                color="white"
+                                icon={<FiHome />}
+                                onClick={handleGoHome}
+                                _hover={{ bg: 'rgba(255, 255, 255, 0.2)' }}
+                            />
+                            <IconButton
+                                aria-label="로그아웃"
+                                variant="ghost"
+                                color="white"
+                                icon={<FiLogOut />}
+                                onClick={handleLogout}
+                                _hover={{ bg: 'rgba(255, 255, 255, 0.2)' }}
+                            />
+                        </HStack>
                     </Flex>
                 </CardHeader>
 
@@ -154,12 +188,21 @@ const Profile: React.FC = () => {
                         bg="slack.blue"
                         size="md"
                         width="full"
+                        onClick={onOpen}
                         _hover={{ bg: '#2B9EBC' }}
                     >
                         프로필 수정
                     </Button>
                 </CardFooter>
             </Card>
+
+            {/* 프로필 수정 모달 */}
+            <EditProfileModal
+                isOpen={isOpen}
+                onClose={onClose}
+                userData={user}
+                onSuccess={handleEditSuccess}
+            />
         </Container>
     );
 };

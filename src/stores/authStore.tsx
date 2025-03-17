@@ -24,6 +24,14 @@ interface RegisterData {
     profile?: string;
 }
 
+// 사용자 정보 업데이트 요청 데이터 타입
+interface UserUpdateData {
+    email: string;
+    username?: string;
+    password?: string;
+    profile?: string;
+}
+
 // 인증 상태 저장소 타입
 interface AuthState {
     user: User | null;
@@ -35,6 +43,7 @@ interface AuthState {
     login: (credentials: LoginCredentials) => Promise<boolean>;
     logout: () => void;
     register: (data: RegisterData) => Promise<boolean>;
+    updateUser: (data: UserUpdateData) => Promise<boolean>;
     clearError: () => void;
 }
 
@@ -75,7 +84,14 @@ const useAuthStore = create<AuthState>()(
                     let errorMessage = '로그인에 실패했습니다.';
 
                     if (axios.isAxiosError(error) && error.response) {
-                        errorMessage = error.response.data.message || errorMessage;
+                        // 검증 에러인 경우 (errors 객체가 있는 경우)
+                        if (error.response.data.errors) {
+                            // 모든 에러 메시지를 하나의 문자열로 합침
+                            errorMessage = Object.values(error.response.data.errors).join('\n');
+                        } else {
+                            // 일반 에러 메시지
+                            errorMessage = error.response.data.message || errorMessage;
+                        }
                     }
 
                     set({
@@ -122,7 +138,56 @@ const useAuthStore = create<AuthState>()(
                     let errorMessage = '회원가입에 실패했습니다.';
 
                     if (axios.isAxiosError(error) && error.response) {
-                        errorMessage = error.response.data.message || errorMessage;
+                        // 검증 에러인 경우 (errors 객체가 있는 경우)
+                        if (error.response.data.errors) {
+                            // 모든 에러 메시지를 하나의 문자열로 합침
+                            errorMessage = Object.values(error.response.data.errors).join('\n');
+                        } else {
+                            // 일반 에러 메시지
+                            errorMessage = error.response.data.message || errorMessage;
+                        }
+                    }
+
+                    set({
+                        isLoading: false,
+                        error: errorMessage,
+                    });
+
+                    return false;
+                }
+            },
+
+            // 사용자 정보 업데이트 함수 (백엔드 API 호출)
+            updateUser: async (data: UserUpdateData) => {
+                set({ isLoading: true, error: null });
+
+                try {
+                    // 백엔드 API 호출 - /api/users/{email} 형식으로 PUT 요청
+                    const response = await api.put(`/api/users/${data.email}`, data);
+
+                    // 업데이트된 사용자 정보
+                    const updatedUser = response.data;
+
+                    // 상태 업데이트
+                    set({
+                        user: updatedUser,
+                        isLoading: false
+                    });
+
+                    return true;
+                } catch (error) {
+                    // 오류 처리
+                    let errorMessage = '프로필 업데이트에 실패했습니다.';
+
+                    if (axios.isAxiosError(error) && error.response) {
+                        // 검증 에러인 경우 (errors 객체가 있는 경우)
+                        if (error.response.data.errors) {
+                            // 모든 에러 메시지를 하나의 문자열로 합침
+                            errorMessage = Object.values(error.response.data.errors).join('\n');
+                        } else {
+                            // 일반 에러 메시지
+                            errorMessage = error.response.data.message || errorMessage;
+                        }
                     }
 
                     set({

@@ -114,25 +114,25 @@ export default function ChatPage() {
         const socket = new WebSocket(wsUrl);
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
-           // 메시지 수신
-           stompClient.current.subscribe(`/sub/chatroom/${chatRoomId}`, (message: { body: string; }) => {
-               // 누군가 발송했던 메시지를 리스트에 추가 (메시지 리스트 최신화)
-               const newMessage = JSON.parse(message.body);
-               console.log('#########################')
-               console.log(newMessage)
-               setMessages((preMessages) => [...preMessages, newMessage]);
+            // 메시지 수신
+            stompClient.current.subscribe(`/sub/chatroom/${chatRoomId}`, (message: { body: string; }) => {
+                // 누군가 발송했던 메시지를 리스트에 추가 (메시지 리스트 최신화)
+                const newMessage = JSON.parse(message.body);
+                console.log('#########################')
+                console.log(newMessage)
+                setMessages((preMessages) => [...preMessages, newMessage]);
 
-               // 다른 사용자의 메세지일 경우 알림
-               if (newMessage.username !== username) {
-                   toast({
-                       title: `${newMessage.username}님의 메시지`,
-                       description: newMessage.content,
-                       status: "info",
-                       duration: 500,
-                       isClosable: true,
-                   });
-               }
-           })
+                // 다른 사용자의 메세지일 경우 알림
+                if (newMessage.username !== username) {
+                    toast({
+                        title: `${newMessage.username}님의 메시지`,
+                        description: newMessage.content,
+                        status: "info",
+                        duration: 500,
+                        isClosable: true,
+                    });
+                }
+            })
             // 연결 성공 토스트
             toast({
                 title: "연결 성공",
@@ -176,19 +176,33 @@ export default function ChatPage() {
 
 
     return (
-        <Container maxW="container.md" p={0} height="100vh">
-            <Flex direction="column" h="100%" bg={bgColor} borderRadius="md" overflow="hidden" boxShadow="lg">
+        <Container
+            maxW="container.md"
+            p={0}
+            height="calc(100vh - 60px)" // 바텀 네비게이션 높이(60px)만큼 빼줌
+            pt={2} // 상단에 약간의 패딩 추가
+            pb={2} // 하단에 약간의 패딩 추가
+        >
+            <Flex
+                direction="column"
+                h="100%"
+                bg={bgColor}
+                borderRadius="md"
+                overflow="hidden"
+                boxShadow="lg"
+            >
                 {/* 채팅 헤더 */}
-                <Box p={4} bg={headerBg} color="white">
+                <Box p={3} bg={headerBg} color="white"> {/* 헤더 패딩 줄임 */}
                     <Flex align="center">
                         <Button
                             variant="ghost"
                             color="white"
                             mr={2}
+                            size="sm" // 버튼 크기 줄임
                             onClick={() => navigate("/chats")}
                             _hover={{ bg: "rgba(255,255,255,0.2)" }}
                         >
-                            <ArrowBackIcon boxSize={6} />
+                            <ArrowBackIcon boxSize={5} /> {/* 아이콘 크기 줄임 */}
                         </Button>
                         <ChatIcon mr={2} />
                         <Heading size="md">실시간 채팅</Heading>
@@ -203,14 +217,14 @@ export default function ChatPage() {
                 <Box
                     flex="1"
                     overflowY="auto"
-                    p={4}
+                    p={3} // 패딩 줄임
                     bg={messageAreaBg}
                     css={{
                         "&::-webkit-scrollbar": {
-                            width: "8px",
+                            width: "6px", // 스크롤바 너비 줄임
                         },
                         "&::-webkit-scrollbar-track": {
-                            width: "10px",
+                            width: "8px",
                         },
                         "&::-webkit-scrollbar-thumb": {
                             background: "#CBD5E0",
@@ -218,7 +232,7 @@ export default function ChatPage() {
                         },
                     }}
                 >
-                    <VStack spacing={4} align="stretch">
+                    <VStack spacing={3} align="stretch"> {/* 간격 줄임 */}
                         {messages.map((item, index) => (
                             <MessageItem key={index} message={item} isMine={item.username === username} />
                         ))}
@@ -227,7 +241,7 @@ export default function ChatPage() {
                 </Box>
 
                 {/* 메시지 입력 영역 */}
-                <Box p={4} borderTopWidth="1px" bg="white">
+                <Box p={3} borderTopWidth="1px" bg="white"> {/* 패딩 줄임 */}
                     <InputGroup size="md">
                         <Input
                             placeholder="메시지를 입력하세요..."
@@ -281,7 +295,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isMine }) => {
                 <Box
                     bg={bgColor}
                     color={textColor}
-                    px={4}
+                    px={3} // 패딩 줄임
                     py={2}
                     borderRadius="lg"
                     borderTopRightRadius={isMine ? 0 : "lg"}
