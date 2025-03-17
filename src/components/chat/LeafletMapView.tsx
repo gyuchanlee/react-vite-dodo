@@ -142,47 +142,96 @@ const LeafletMapView: React.FC<LeafletMapViewProps> = ({
                             key={locationKey}
                             position={[lat, lng]}
                         >
-                            <Popup>
+                            <Popup maxWidth={280} minWidth={220}>
                                 <div style={{
-                                    padding: '0.5rem',
-                                    maxHeight: '300px',
-                                    overflowY: 'auto'
+                                    padding: '0.25rem',
+                                    maxHeight: '250px',
+                                    overflowY: 'auto',
+                                    fontSize: '0.9rem'
                                 }}>
+                                    <p style={{
+                                        fontSize: '0.7rem',
+                                        color: '#6b7280',
+                                        textAlign: 'center',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        {rooms.length}개의 채팅방이 있습니다
+                                    </p>
+
                                     {rooms.map((room) => (
                                         <div
                                             key={room.chatRoomId}
                                             style={{
                                                 marginBottom: '0.5rem',
-                                                borderBottom: '1px solid #e0e0e0'
+                                                padding: '0.5rem',
+                                                borderRadius: '0.375rem',
+                                                backgroundColor: '#f9fafb',
+                                                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                                             }}
                                         >
-                                            <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', marginBottom: '0.25rem' }}>
-                                                {room.name}
-                                            </h3>
-                                            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <h3 style={{
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.95rem',
+                                                    marginBottom: '0.25rem',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    maxWidth: '70%'
+                                                }}>
+                                                    {room.name}
+                                                </h3>
+                                                <span style={{
+                                                    fontSize: '0.65rem',
+                                                    color: '#6b7280',
+                                                    backgroundColor: '#e5e7eb',
+                                                    padding: '0.1rem 0.3rem',
+                                                    borderRadius: '0.25rem'
+                                                }}>
+                                    {formatDistance(room.distance)}
+                                </span>
+                                            </div>
+
+                                            <p style={{
+                                                fontSize: '0.75rem',
+                                                color: '#4b5563',
+                                                marginBottom: '0.25rem',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                maxHeight: '2.4em'
+                                            }}>
                                                 {room.description}
                                             </p>
-                                            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                                                참여자: {room.participantsCount}명
-                                            </p>
-                                            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.5rem' }}>
-                                                {formatDistance(room.distance)}
-                                            </p>
-                                            <button
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '0.25rem 0',
-                                                    backgroundColor: '#22c55e',
-                                                    color: 'white',
-                                                    borderRadius: '0.375rem',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    marginBottom: '0.5rem'
-                                                }}
-                                                onClick={() => enterChatRoom(room.chatRoomId)}
-                                            >
-                                                입장하기
-                                            </button>
+
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                marginTop: '0.25rem'
+                                            }}>
+                                <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>
+                                    참여자: {room.participantsCount}명
+                                </span>
+
+                                                <button
+                                                    style={{
+                                                        padding: '0.2rem 0.5rem',
+                                                        backgroundColor: '#22c55e',
+                                                        color: 'white',
+                                                        borderRadius: '0.25rem',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                    onClick={() => enterChatRoom(room.chatRoomId)}
+                                                >
+                                                    입장
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

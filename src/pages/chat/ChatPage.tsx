@@ -110,7 +110,8 @@ export default function ChatPage() {
 
     // 웹소켓 연결 함수
     const connect = () => {
-        const socket = new WebSocket("ws://localhost:8080/ws");
+        const wsUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000/ws"; // todo 배포 시 url 변경
+        const socket = new WebSocket(wsUrl);
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
            // 메시지 수신

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 기본 설정된 axios 인스턴스 생성
 const http = axios.create({
-    baseURL: 'http://localhost:8080', // 여기에 API 기본 URL todo 배포 시, 변경 필요
+    baseURL:  import.meta.env.VITE_API_URL || 'http://localhost:8000', // 여기에 API 기본 URL todo 배포 시 url 변경
     withCredentials: true, // 이 설정이 쿠키를 자동으로 요청에 포함시킴
     headers: {
         'Content-Type': 'application/json',

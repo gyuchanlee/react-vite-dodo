@@ -40,7 +40,7 @@ interface AuthState {
 
 // API 클라이언트 설정
 const api = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000', // todo 배포 시 url 변경
     withCredentials: true,
 });
 
