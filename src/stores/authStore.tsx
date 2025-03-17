@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 import axios from 'axios';
-import {setupAuthInterceptors} from "../api/setupAuthInterceptors.tsx";
+import {api, setupAuthInterceptors} from "../api/setupAuthInterceptors";
 
 // 사용자 타입 정의
 interface User {
@@ -48,161 +48,164 @@ interface AuthState {
     clearError: () => void;
 }
 
-// API 클라이언트 설정
-const api = setupAuthInterceptors(axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000', // todo 배포 시 url 변경
-    withCredentials: true,
-}));
 
 // Zustand 스토어 생성 및 persist 적용
 const useAuthStore = create<AuthState>()(
     persist(
-        (set) => ({
-            // 초기 상태
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-            error: null,
+        (set, get) => {
+            // 인터셉터 설정
+            setupAuthInterceptors(() => {
+                const logout = get().logout;
+                logout();
+            });
 
-            // 로그인 함수
-            login: async (credentials: LoginCredentials) => {
-                set({ isLoading: true, error: null });
+            return {
+                // 초기 상태
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: null,
 
-                try {
-                    // 백엔드 API 호출
-                    const response = await api.post('/api/auth/login', credentials);
+                // 로그인 함수
+                login: async (credentials: LoginCredentials) => {
+                    set({ isLoading: true, error: null });
 
-                    // 로그인 성공 시 사용자 정보 설정
-                    set({
-                        user: response.data,
-                        isAuthenticated: true,
-                        isLoading: false,
-                    });
+                    try {
+                        // 백엔드 API 호출
+                        const response = await api.post('/api/auth/login', credentials);
 
-                    return true;
-                } catch (error) {
-                    // 오류 처리
-                    let errorMessage = '로그인에 실패했습니다.';
+                        // 로그인 성공 시 사용자 정보 설정
+                        set({
+                            user: response.data,
+                            isAuthenticated: true,
+                            isLoading: false,
+                        });
 
-                    if (axios.isAxiosError(error) && error.response) {
-                        // 검증 에러인 경우 (errors 객체가 있는 경우)
-                        if (error.response.data.errors) {
-                            // 모든 에러 메시지를 하나의 문자열로 합침
-                            errorMessage = Object.values(error.response.data.errors).join('\n');
-                        } else {
-                            // 일반 에러 메시지
-                            errorMessage = error.response.data.message || errorMessage;
+                        return true;
+                    } catch (error) {
+                        // 오류 처리
+                        let errorMessage = '로그인에 실패했습니다.';
+
+                        if (axios.isAxiosError(error) && error.response) {
+                            // 검증 에러인 경우 (errors 객체가 있는 경우)
+                            if (error.response.data.errors) {
+                                // 모든 에러 메시지를 하나의 문자열로 합침
+                                errorMessage = Object.values(error.response.data.errors).join('\n');
+                            } else {
+                                // 일반 에러 메시지
+                                errorMessage = error.response.data.message || errorMessage;
+                            }
                         }
+
+                        set({
+                            user: null,
+                            isAuthenticated: false,
+                            isLoading: false,
+                            error: errorMessage,
+                        });
+
+                        return false;
+                    }
+                },
+
+                // 로그아웃 함수
+                logout: async () => {
+                    try {
+                        // 백엔드 로그아웃 API 호출
+                        await api.post('/api/auth/logout');
+                    } catch (error) {
+                        console.error('로그아웃 API 호출 중 오류:', error);
                     }
 
+                    // 로컬 상태 초기화
                     set({
                         user: null,
                         isAuthenticated: false,
-                        isLoading: false,
-                        error: errorMessage,
+                        error: null,
                     });
+                },
 
-                    return false;
-                }
-            },
+                // 회원가입 함수
+                register: async (data: RegisterData) => {
+                    set({ isLoading: true, error: null });
 
-            // 로그아웃 함수
-            logout: async () => {
-                try {
-                    // 백엔드 로그아웃 API 호출
-                    await api.post('/api/auth/logout');
-                } catch (error) {
-                    console.error('로그아웃 API 호출 중 오류:', error);
-                }
+                    try {
+                        // 백엔드 API 호출
+                        await api.post('/api/users/', data);
 
-                // 로컬 상태 초기화
-                set({
-                    user: null,
-                    isAuthenticated: false,
-                    error: null,
-                });
-            },
+                        // 회원가입 성공
+                        set({ isLoading: false });
+                        return true;
+                    } catch (error) {
+                        // 오류 처리
+                        let errorMessage = '회원가입에 실패했습니다.';
 
-            // 회원가입 함수
-            register: async (data: RegisterData) => {
-                set({ isLoading: true, error: null });
-
-                try {
-                    // 백엔드 API 호출
-                    await api.post('/api/users/', data);
-
-                    // 회원가입 성공
-                    set({ isLoading: false });
-                    return true;
-                } catch (error) {
-                    // 오류 처리
-                    let errorMessage = '회원가입에 실패했습니다.';
-
-                    if (axios.isAxiosError(error) && error.response) {
-                        // 검증 에러인 경우 (errors 객체가 있는 경우)
-                        if (error.response.data.errors) {
-                            // 모든 에러 메시지를 하나의 문자열로 합침
-                            errorMessage = Object.values(error.response.data.errors).join('\n');
-                        } else {
-                            // 일반 에러 메시지
-                            errorMessage = error.response.data.message || errorMessage;
+                        if (axios.isAxiosError(error) && error.response) {
+                            // 검증 에러인 경우 (errors 객체가 있는 경우)
+                            if (error.response.data.errors) {
+                                // 모든 에러 메시지를 하나의 문자열로 합침
+                                errorMessage = Object.values(error.response.data.errors).join('\n');
+                            } else {
+                                // 일반 에러 메시지
+                                errorMessage = error.response.data.message || errorMessage;
+                            }
                         }
+
+                        set({
+                            isLoading: false,
+                            error: errorMessage,
+                        });
+
+                        return false;
                     }
+                },
 
-                    set({
-                        isLoading: false,
-                        error: errorMessage,
-                    });
+                // 사용자 정보 업데이트 함수 (백엔드 API 호출)
+                updateUser: async (data: UserUpdateData) => {
+                    set({ isLoading: true, error: null });
 
-                    return false;
-                }
-            },
+                    try {
+                        // 백엔드 API 호출 - /api/users/{email} 형식으로 PUT 요청
+                        const response = await api.put(`/api/users/${data.email}`, data);
 
-            // 사용자 정보 업데이트 함수 (백엔드 API 호출)
-            updateUser: async (data: UserUpdateData) => {
-                set({ isLoading: true, error: null });
+                        // 업데이트된 사용자 정보
+                        const updatedUser = response.data;
 
-                try {
-                    // 백엔드 API 호출 - /api/users/{email} 형식으로 PUT 요청
-                    const response = await api.put(`/api/users/${data.email}`, data);
+                        // 상태 업데이트
+                        set({
+                            user: updatedUser,
+                            isLoading: false
+                        });
 
-                    // 업데이트된 사용자 정보
-                    const updatedUser = response.data;
+                        return true;
+                    } catch (error) {
+                        // 오류 처리
+                        let errorMessage = '프로필 업데이트에 실패했습니다.';
 
-                    // 상태 업데이트
-                    set({
-                        user: updatedUser,
-                        isLoading: false
-                    });
-
-                    return true;
-                } catch (error) {
-                    // 오류 처리
-                    let errorMessage = '프로필 업데이트에 실패했습니다.';
-
-                    if (axios.isAxiosError(error) && error.response) {
-                        // 검증 에러인 경우 (errors 객체가 있는 경우)
-                        if (error.response.data.errors) {
-                            // 모든 에러 메시지를 하나의 문자열로 합침
-                            errorMessage = Object.values(error.response.data.errors).join('\n');
-                        } else {
-                            // 일반 에러 메시지
-                            errorMessage = error.response.data.message || errorMessage;
+                        if (axios.isAxiosError(error) && error.response) {
+                            // 검증 에러인 경우 (errors 객체가 있는 경우)
+                            if (error.response.data.errors) {
+                                // 모든 에러 메시지를 하나의 문자열로 합침
+                                errorMessage = Object.values(error.response.data.errors).join('\n');
+                            } else {
+                                // 일반 에러 메시지
+                                errorMessage = error.response.data.message || errorMessage;
+                            }
                         }
+
+                        set({
+                            isLoading: false,
+                            error: errorMessage,
+                        });
+
+                        return false;
                     }
+                },
 
-                    set({
-                        isLoading: false,
-                        error: errorMessage,
-                    });
-
-                    return false;
-                }
-            },
-
-            // 오류 상태 초기화
-            clearError: () => set({ error: null }),
-        }),
+                // 오류 상태 초기화
+                clearError: () => set({ error: null }),
+            };
+        },
         {
             // localStorage에 저장할 때 사용할 키 이름
             name: 'auth-storage',

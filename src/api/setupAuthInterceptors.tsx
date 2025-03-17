@@ -1,26 +1,22 @@
-// src/api/interceptors.ts
-import {AxiosError, AxiosInstance} from 'axios';
-import useAuthStore from '../stores/authStore'; // Zustand 스토어 경로에 맞게 수정
+import {AxiosError} from 'axios';
+import {api} from './api';
 
-// 인증 인터셉터 설정 함수
-export const setupAuthInterceptors = (axiosInstance: AxiosInstance) => {
-    // 응답 인터셉터
-    axiosInstance.interceptors.response.use(
+export function setupAuthInterceptors(logoutCallback: () => void) {
+    
+    api.interceptors.response.use(
         (response) => response,
         (error: AxiosError) => {
-            // 401 Unauthorized 에러 처리
+            // 401 Unauthorized or 403 Forbidden error handling
             if (error.response?.status === 401 || error.response?.status === 403) {
-                // 스토어에서 로그아웃 함수 호출 (비동기 상태 업데이트)
-                const logout = useAuthStore.getState().logout;
-                logout();
-
-                // 필요하다면 로그인 페이지로 리다이렉트
+                logoutCallback();
+                
+                // 로그아웃시, 리다이렉트
                 window.location.href = '/login';
             }
 
             return Promise.reject(error);
         }
     );
+}
 
-    return axiosInstance;
-};
+export {api};

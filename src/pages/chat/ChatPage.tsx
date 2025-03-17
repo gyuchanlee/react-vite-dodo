@@ -45,6 +45,7 @@ export default function ChatPage() {
     // zustand
     const email = useAuthStore((state) => state.user?.email);
     const username = useAuthStore((state) => state.user?.username);
+    const isAuthenticated  = useAuthStore((state) => state.isAuthenticated );
     // 주소 url 에서 가져오기
     const { id } = useParams();
     const chatRoomId = id ? parseInt(id, 10) : undefined;
@@ -107,6 +108,20 @@ export default function ChatPage() {
         // 컴포넌트 언마운트 시 웹소켓 연결 해제
         return () => disconnect();
     }, []);
+
+    // isAuthenticated -> 만료되어서 로그아웃되었을 경우 대비
+    useEffect(() => {
+        // 인증 상태가 변경되면 처리
+        if (!isAuthenticated) {
+            // 소켓 연결 해제 로직
+            if (stompClient.current && stompClient.current.connected) {
+                stompClient.current.disconnect();
+            }
+        } else if (isAuthenticated) {
+            // 연결 로직
+            connect();
+        }
+    }, [isAuthenticated]);
 
     // 웹소켓 연결 함수
     const connect = () => {
