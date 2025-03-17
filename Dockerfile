@@ -7,6 +7,7 @@ COPY package*.json ./
 RUN npm i
 
 COPY . .
+ENV NODE_ENV=production
 RUN npm run build
 
 # 실행 단계
